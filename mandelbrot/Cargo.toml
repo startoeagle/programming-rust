@@ -6,3 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+num = "0.4.0"      	# A collection of numeric types and traits for Rust, including bigint, complex, rational, ran…
+image = "0.13.0"   	# Imaging library written in Rust. Provides basic filters and decoders for the most common image f…
+anyhow = "1.0.56"  	# Flexible concrete Error type built on std::error::Error
+crossbeam = "0.8.1"	# Tools for concurrent programming
