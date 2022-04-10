@@ -1,0 +1,34 @@
+#+title: Notes
+
+We can check that values for overflow. In
+
+If we are using debug mode when compiling with =cargo=, then Rust will panic.
+
+#+begin_src rust
+fn main() {
+    let mut x = 2i8;
+    loop {
+        // thiswill not end, with relase mode in cargo
+        x = x * x;
+    }
+}
+#+end_src
+
+#+RESULTS:
+: thread 'main' panicked at 'attempt to multiply with overflow', src/main.rs:6:9
+
+We can exceplicit check this even if we are in release mode.
+#+RESULTS:
+: error: Could not compile `cargoXR7VKL`.
+#+begin_src rust
+fn main() {
+    let mut x = 2i8;
+
+    loop {
+        x = x.checked_mul(x).expect("overflow");
+    }
+}
+#+end_src
+
+#+RESULTS:
+: thread 'main' panicked at 'overflow', src/main.rs:6:30

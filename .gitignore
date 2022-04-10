@@ -1,2 +1,5 @@
 **/target
 *.png
+\#notes.org\#
+notes.html
+
