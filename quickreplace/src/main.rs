@@ -1,4 +1,4 @@
-use std::process::{exit};
+use std::process::exit;
 
 use regex::Regex;
 use text_colorizer::*;
