@@ -1,6 +1,6 @@
 #+title: Notes
 
-We can check that values for overflow. In
+We can check that values for overflow.
 
 If we are using debug mode when compiling with =cargo=, then Rust will panic.
 
@@ -25,7 +25,6 @@ We can explicit check this even if we are in release mode.
 #+begin_src rust :exports both
 fn main() {
     let mut x = 2i8;
-
     loop {
         x = x.checked_mul(x).expect("overflow");
     }
