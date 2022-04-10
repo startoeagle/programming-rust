@@ -9,7 +9,7 @@ If we are using debug mode when compiling with =cargo=, then Rust will panic.
 fn main() {
     let mut x = 2i8;
     loop {
-        // thiswill not end, with relase mode in cargo
+        // this will not end, with relase mode in cargo
         x = x * x;
     }
 }
