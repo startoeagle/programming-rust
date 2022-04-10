@@ -1,5 +1,6 @@
 #+title: Notes
 
+* Saftey in integer types
 We can check that values for overflow.
 
 If we are using debug mode when compiling with =cargo=, then Rust will panic.
@@ -33,3 +34,64 @@ fn main() {
 
 #+RESULTS:
 : thread 'main' panicked at 'overflow', src/main.rs:6:30
+
+* Moving values
+Assignment for non-=Copy= types is moved. This means that we cannot keep assigning our vector to different vectors.
+#+begin_src rust :exports code
+fn main() {
+    let xs = vec![12, 3, 4];
+    let ys = xs;
+    let zs = xs;
+}
+#+end_src
+
+#+RESULTS:
+: error: Could not compile `cargoajBiwO`.
+#+begin_src
+  |
+3 |     let xs = vec![12, 3, 4];
+  |         -- move occurs because `xs` has type `Vec<i32>`, which does not implement the `Copy` trait
+4 |     let ys = xs;
+  |              -- value moved here
+5 |     let zs = xs;
+  |              ^^ value used here after move
+#+end_src
+
+
+As we can see, =xs= have been moved an is now unitialized, so we cannot move =xs= again to =zs=.
+
+We cannot get a =move= a value from inside a vector. Consider
+#+begin_src rust
+fn main() {
+    let v = vec!["testing".to_string(), "hejsan".to_string()];
+    let string = v[1];
+}
+#+end_src
+
+#+RESULTS:
+: error: Could not compile `cargoJHsjvA`.
+#+begin_src
+  |
+4 |     let string = v[1];
+  |                  ^^^^
+  |                  |
+  |                  move occurs because value has type `String`, which does not implement the `Copy` trait
+  |                  help: consider borrowing here: `&v[1]`
+#+end_src
+Rust suggets that we can borrow the value instead, which is the same as moving a reference to that value. This makes sence, since the =Vector= type should not have to keep track if some of its values has been moved; we should be upfront about this!
+
+There are also more untrivial ways to handle this. For instance, we can =pop= the value, swap it with something else, etc.
+#+begin_src rust
+fn main() {
+    let mut v = vec!["testing".to_string(), "hejsan".to_string()];
+    let swapped = std::mem::replace(&mut v[1], "new string".to_string());
+    assert_eq!(swapped, "hejsan");
+    let s = v.pop().expect("vetor is empty");
+    assert_eq!(s, "new string");
+    let removed = v.swap_remove(0);
+    assert_eq!(removed, "testing");
+    assert_eq!(0, v.len());
+}
+#+end_src
+
+#+RESULTS:
