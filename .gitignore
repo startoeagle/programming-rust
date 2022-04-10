@@ -1,5 +1,8 @@
 **/target
 *.png
-\#notes.org\#
-notes.html
 
+# artifacts from emacs
+\#*\#
+
+*.html
+~**/*.html
