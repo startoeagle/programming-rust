@@ -17,9 +17,11 @@ fn main() {
 #+RESULTS:
 : thread 'main' panicked at 'attempt to multiply with overflow', src/main.rs:6:9
 
-We can exceplicit check this even if we are in release mode.
+We can explicit check this even if we are in release mode.
+
 #+RESULTS:
 : error: Could not compile `cargoXR7VKL`.
+
 #+begin_src rust
 fn main() {
     let mut x = 2i8;
