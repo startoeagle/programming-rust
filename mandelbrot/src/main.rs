@@ -50,7 +50,7 @@ fn main() {
                 }
             })
             .unwrap();
-        };
+        }
     }
 
     write_image(&filename, &pixels, bounds).expect("could not write to file");
@@ -70,6 +70,10 @@ fn escape(c: Complex64, limit: usize) -> Option<usize> {
     None
 }
 
+/// Usage
+/// ```
+///    assert_eq!(parse_pair::<usize>("400x32", 'x'), Some((400, 321)));
+/// ```
 fn parse_pair<T: FromStr>(s: &str, separator: char) -> Option<Point<T>> {
     match s.find(separator) {
         None => None,
