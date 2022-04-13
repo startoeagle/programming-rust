@@ -1,2 +1,2 @@
 [workspace]
-members = ["actix-gcd", "mandelbrot", "quickreplace"]
+members = ["actix-gcd", "mandelbrot", "quickreplace", "pomodoro"]
