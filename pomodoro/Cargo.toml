@@ -9,3 +9,4 @@ edition = "2021"
 notify-rust = "4"            # Show desktop notifications (linux, bsd, mac). Pure Rust dbus client and server.
 # todo include features needed
 tokio = { version = "1", features = ["rt", "macros", "time"] }
+iced = "0.3.0"
