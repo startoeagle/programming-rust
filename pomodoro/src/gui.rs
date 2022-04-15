@@ -1,31 +1,48 @@
-use iced::{Element, Sandbox, Settings, Text};
+use iced::{mouse::Button, Application, Sandbox, Slider};
+use std::iter;
 
-pub fn start_main() -> iced::Result {
-    Hello::run(Settings::default())
+use crate::PomodoroSchedule;
+
+pub struct AppData {
+    schedule: iter::Cycle<PomodoroSchedule>,
 }
+impl Sandbox for AppData {
 
-struct Hello;
-
-impl Sandbox for Hello {
     type Message = ();
 
-    fn new() -> Hello {
-        Hello
+    fn new() -> Self {
+        AppData {
+            schedule: PomodoroSchedule::new().cycle(),
+        }
     }
 
     fn title(&self) -> String {
-        String::from("A cool application")
+        "Pomodoro".to_string()
     }
 
-    fn update(&mut self, _message: Self::Message) {
-        // This application has no interactions
+    fn update(
+        &mut self,
+        _message: Self::Message,
+    ) {
     }
 
-    fn view(&mut self) -> Element<Self::Message> {
-        Text::new("Hello, world!").into()
+    fn view(&mut self) -> iced::Element<Self::Message> {
+        let msg = if let Some(period) = self.schedule.next() {
+            period.message()
+        } else {
+            "There are no periods to display"
+        };
+        match super::notify(msg) {
+            Err(e) => println!("{}", e),
+            Ok(_) => (),
+        }
+        let column = iced::Column::new().push(iced::Element::from(iced::Text::new(msg)));
+        column.into()
     }
+}
 
-    fn background_color(&self) -> iced::Color {
-        iced::Color::from_rgb(0.2, 0.2, 0.6)
-    }
+/// Displays the time left of the period
+struct Timer {
+    minute: u8,
+    second: u8,
 }

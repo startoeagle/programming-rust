@@ -1,13 +1,13 @@
 #![doc = include_str!("../README.md")]
 
+use iced::Application;
 use notify_rust as notify;
-use tokio::time;
 
 mod gui;
 
 const SECONDS_PER_MINUTE: u64 = 60;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Period {
     Work = 25,
     Break = 5,
@@ -24,6 +24,7 @@ impl Period {
     }
 }
 
+#[derive(Clone)]
 struct PomodoroSchedule {
     period: u8,
 }
@@ -32,20 +33,25 @@ impl PomodoroSchedule {
     fn new() -> Self {
         Self { period: 0 }
     }
+}
+impl Iterator for PomodoroSchedule {
+    type Item = Period;
 
-    fn next_period(&mut self) -> Period {
+    fn next(&mut self) -> Option<Period> {
         self.period += 1;
-        if self.period % 2 == 1 {
-            return Period::Work;
+        if self.period > 8 {
+            None
         } else if self.period == 8 {
-            self.period = 0;
-            return Period::LongBreak;
+            Some(Period::LongBreak)
+        } else if self.period % 2 == 1 {
+            Some(Period::Work)
+        } else {
+            Some(Period::Break)
         }
-        Period::Break
     }
 }
 
-async fn notify(msg: &str) -> Result<(), notify_rust::error::Error> {
+fn notify(msg: &str) -> Result<(), notify_rust::error::Error> {
     notify::Notification::new()
         .summary("Pomodoro")
         .body(msg)
@@ -53,21 +59,8 @@ async fn notify(msg: &str) -> Result<(), notify_rust::error::Error> {
     Ok(())
 }
 
-#[tokio::main(flavor = "current_thread")]
-async fn main() {
-    // let mut pomodoro_schedule = PomodoroSchedule::new();
-    // let mut period = pomodoro_schedule.next_period();
-    // let duration = time::Duration::from_secs;
-    // let mut interval = time::interval(duration(SECONDS_PER_MINUTE * period as u64));
-    // loop {
-        // interval.tick().await;
-        // notify(period.message())
-            // .await
-            // .expect("Could notify the system");
-        // period = pomodoro_schedule.next_period();
-        // interval = time::interval(duration(SECONDS_PER_MINUTE * period as u64));
-    // }
-    gui::start_main();
+fn main() {
+    gui::AppData::run(iced::Settings::default()).expect("could start application");
 }
 
 #[test]
@@ -75,19 +68,38 @@ fn test_period_schedule() {
     use crate::Period::*;
 
     let mut ps = PomodoroSchedule::new();
-    for _ in 0..2 {
-        assert_eq!(ps.next_period(), Work);
-        assert_eq!(ps.next_period(), Break);
+    let mut period = ps.into_iter();
+    assert_eq!(period.next(), Some(Work));
+    assert_eq!(period.next(), Some(Break));
 
-        assert_eq!(ps.next_period(), Work);
-        assert_eq!(ps.next_period(), Break);
+    assert_eq!(period.next(), Some(Work));
+    assert_eq!(period.next(), Some(Break));
 
-        assert_eq!(ps.next_period(), Work);
-        assert_eq!(ps.next_period(), Break);
+    assert_eq!(period.next(), Some(Work));
+    assert_eq!(period.next(), Some(Break));
 
-        assert_eq!(ps.next_period(), Work);
-        assert_eq!(ps.next_period(), LongBreak);
+    assert_eq!(period.next(), Some(Work));
+    assert_eq!(period.next(), Some(LongBreak));
 
-        assert_eq!(ps.period, 0);
-    }
+    assert_eq!(period.next(), None);
+}
+#[test]
+fn test_cyclic_schedule() {
+    use crate::Period::*;
+
+    let mut ps = PomodoroSchedule::new();
+    let mut period = ps.into_iter().cycle();
+    assert_eq!(period.next(), Some(Work));
+    assert_eq!(period.next(), Some(Break));
+
+    assert_eq!(period.next(), Some(Work));
+    assert_eq!(period.next(), Some(Break));
+
+    assert_eq!(period.next(), Some(Work));
+    assert_eq!(period.next(), Some(Break));
+
+    assert_eq!(period.next(), Some(Work));
+    assert_eq!(period.next(), Some(LongBreak));
+
+    assert_eq!(period.next(), Some(Work));
 }
