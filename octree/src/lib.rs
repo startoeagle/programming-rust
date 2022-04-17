@@ -92,7 +92,7 @@ impl Octree {
             Octree::Empty
         } else {
             let (index, point) = center_point(&points);
-            points.remove(index);
+            let _ = points.swap_remove(index);
 
             // split points around the pivot
             let (left, right): (Vec<Point>, Vec<Point>) =
