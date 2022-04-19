@@ -1,5 +1,3 @@
-#![feature(iter_partition_in_place)]
-
 use std::ops::Add;
 use std::ops::Div;
 
