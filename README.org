@@ -78,7 +78,9 @@ fn main() {
   |                  move occurs because value has type `String`, which does not implement the `Copy` trait
   |                  help: consider borrowing here: `&v[1]`
 #+end_src
-Rust suggets that we can borrow the value instead, which is the same as moving a reference to that value. This makes sence, since the =Vector= type should not have to keep track if some of its values has been moved; we should be upfront about this!
+Rust suggets that we can borrow the value instead, which is the same as moving a
+reference to that value. This makes sence, since the =Vector= type should not
+have to keep track if some of its values has been moved.
 
 There are also more untrivial ways to handle this. For instance, we can =pop= the value, swap it with something else, etc.
 #+begin_src rust
