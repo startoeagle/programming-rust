@@ -5,7 +5,7 @@ use std::ops::Div;
 
 mod random;
 
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Point {
     pub x: f32,
     pub y: f32,
@@ -43,6 +43,18 @@ impl IntoIterator for Point {
     fn into_iter(self) -> Self::IntoIter {
         [self.x, self.y, self.z].into_iter()
     }
+
+}
+
+impl IntoIterator for &Point {
+    type Item = f32;
+
+    type IntoIter = std::array::IntoIter<Self::Item, 3>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        [self.x, self.y, self.z].into_iter()
+    }
+
 }
 
 pub fn l2(lhs: &Point, rhs: &Point) -> f32 {

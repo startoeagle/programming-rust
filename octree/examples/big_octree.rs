@@ -1,7 +1,7 @@
 use octree::{Octree, Point};
 use std::time;
 fn main() {
-    let npoints = 3_000_000;
+    let npoints = 640 * 480;
     let points: Vec<Point> = std::iter::from_fn(|| Some(Point::random()))
         .take(npoints)
         .collect();
