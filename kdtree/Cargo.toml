@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 octree = { path = "../octree/" }
 pdqsort = "1"      # Pattern-defeating quicksort
+rayon = "1"

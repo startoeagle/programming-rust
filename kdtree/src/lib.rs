@@ -29,7 +29,7 @@ impl KdTree {
                 point_index(&p).partial_cmp(&point_index(&q)).unwrap()
             });
 
-            let index = &points.len() / 2;
+            let index = points.len() / 2;
             let median = points.iter().nth(index).unwrap().clone();
             let _ = points.swap_remove(index);
 
@@ -37,10 +37,17 @@ impl KdTree {
                 .into_iter()
                 .partition(|p| p.into_iter().nth(axis).unwrap() < point_index(&median));
 
+            // create new trees using rayon to make a divide and conquer
+
+            let (left, right) = rayon::join(
+                || Box::new(go(lower, depth + 1)),
+                || Box::new(go(higher, depth + 1)),
+            );
+
             KdTree::NonEmpty(Node {
                 point: median,
-                left: Box::new(go(lower, depth + 1)),
-                right: Box::new(go(higher, depth + 1)),
+                left,
+                right,
             })
         }
 

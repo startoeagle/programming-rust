@@ -8,3 +8,7 @@
 ~**/*.html
 *.pdf
 *.tex
+
+flamegraph.svg
+perf.data
+perf.data.old
