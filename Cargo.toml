@@ -1,6 +1,7 @@
 [workspace]
 members = [
 	"actix-gcd",
+	"counter",
 	"kdtree",
 	"mandelbrot",
 	"octree",
