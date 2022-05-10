@@ -1,6 +1,261 @@
 #+title: Notes
+#+date: <2022-05-10 tis>
+#+author: Anton Karlsson
+#+email: anton.karlsson@combitech.com
 
-* Saftey in integer types
+Rust is my favorite language, and I will try to specify where it can be really useful.
+
+The main things that makes is good is
++ Memory safety: No program that compiles will have memory error
+  - The only possible one is memory leaks, But I am not sure how to do it.
++ Integer safety: The program will crash (in debug compilation), if we are using integers wrong.
++ Everything must be initiated at declaration; No undefined behavior.
++ No data races are possible between threads; This makes writing multi-threaded more viable
+
+After starting using Rust, there are some additional point that makes you want to stay:
++ =cargo=, the build system. While C and C++ makes hard to get going, Rust makes it easy
+  + Starting a new projects with =cargo new <name>= to create a program,
+  + Use =cargo new --lib <libname>= to create a library
+  + Simply run with =cargo run=
+  + Run tests with =cargo test=. If you are writing a library, even documentation examples are tested(!).
+  + Adding dependencies are easy, just edit you =Cargo,toml= file that is created in the project folder.
+  + For projects when there are smaller teams, rust is useful, since does no have to be someone to handle the build chain in the same way as in C++ or python.
+  + =cargo= is a package manager. (=cargo install ripgrep= and don't look back)
++ Then you code does not compile, then we you'll get nice error messages, with concrete suggestions.
++ Error handling is so much easier
++ Rust enables functional style programming
++ The =impl= keyword is used to add function to you classes (called structs in Rust)
+  + You can add you own =impl= to you classes, as well as ANY type
++ The Trait system is used to instead of inheritance
+  + You can extend any type to with traits
+  + This makes it easy to make two third party libraries communicate
+
+
+* The building blocks
+In rust we have the ordinary tools we find in Python and C++, such as =if=, =for=.
+There is a very nice introduction found here [[https:https://fasterthanli.me/articles/a-half-hour-to-learn-rust][A Half-hour to learn Rust]]
+The official documentation is really good as well, which you'll find at rust-lang.org.
+
+
+** A quick example
+#+begin_src rust :exports both
+// There is only structs in rust, no classes
+// The #[dervie(Debug)] is an auto implementation to print it
+#[derive(Debug)]
+struct Point {
+    x: f32,
+    y: f32,
+    z: f32,
+}
+
+// A function
+fn copy_x(p: &Point) -> f32 {
+    p.x
+}
+
+// Main takes no arguments and returns nothing
+fn main () {
+
+    // We use the `let` keyword to create objects
+    let point = Point {
+        x: 0.0,
+        y: 0.0,
+        z: 0.0,
+    };
+
+    // We can also specify the type of the objects, but rust will infer it usually
+    let p2: Point = Point {
+        x: 0.0,
+        y: 0.0,
+        z: 0.0,
+    };
+
+    // Function evaulation
+    let x = copy_x(&p2);
+
+    // We can make assertions.
+    // The `!` means that we are using a macro
+    assert_eq!(x, p2.x);
+
+    // We can print things
+    println!("{:?}", point);
+
+    // We can make the print fancier with a different formatter
+    println!("{:#?}", point);
+}
+
+#+end_src
+
+#+begin_example
+Point { x: 0.0, y: 0.0, z: 0.0 }
+Point {
+    x: 0.0,
+    y: 0.0,
+    z: 0.0,
+}
+#+end_example
+
+* Creating projects
+
+We create projects with =cargo=.
+
+Explore the repository.
+
+* How memory works in Rust
+Rust is different from how both Python and C++ works. Rust will =move= values when you use the assignment operator (===)
+This is best explained with examples
+
+** Things that are small, such as ints and floats, is copied on assignment
+
+#+begin_src rust
+fn main () {
+    let x = 0;
+    let y = x; // x is copied here
+}
+#+end_src
+
+** Rust will move on assignment.
+For things such as vectors or arrays, strings, etc, Rust will move on assignment.
+#+begin_src rust
+fn main () {
+    let s = "123".to_string();
+    let s2 = s;
+
+    println!("{}", s); // Error: s is moved to s2
+}
+#+end_src
+
+#+RESULTS:
+: error: Could not compile `cargo1nDIeN`.
+
+#+begin_example
+
+error[E0382]: borrow of moved value: `s`
+ --> src/main.rs:6:20
+  |
+3 |     let s = "123".to_string();
+  |         - move occurs because `s` has type `String`, which does not implement the `Copy` trait
+4 |     let s2 = s;
+  |              - value moved here
+5 |
+6 |     println!("{}", s); // Error: s is moved to s2
+  |                    ^ value borrowed here after move
+  |
+  = note: this error originates in the macro `$crate::format_args_nl` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+For more information about this error, try `rustc --explain E0382`.
+#+end_example
+
+When =s= is printed, there is nothing to print. =s= is essentially a null pointer. Rust can knows why; its contents is now owned by =s2=.
+
+We can move the =s= to =s2= with by creating a /shared reference/. We do this with =&=:
+#+begin_src rust
+fn main () {
+    let s = "123".to_string();
+    let s2 = &s; // Borrow s instead
+    let s3 = &s; // We can do this all day
+
+    println!("{}", s); }
+#+end_src
+
+=s2= cannot modify the string contents.
+#+begin_src rust
+fn main() {
+    let mut s = "123".to_string();
+    let s2 = &s;
+
+    // Dereference s2 to change it (similar to pointers in C)
+    *s2 = "321".to_string();
+
+    assert_eq!(s, "321".to_string());
+}
+#+end_src
+
+#+RESULTS:
+: error: Could not compile `cargoyef1Hq`.
+
+The compiler says how:
+#+begin_example
+warning: variable does not need to be mutable
+ --> src/main.rs:3:9
+  |
+3 |     let mut s = "123".to_string();
+  |         ----^
+  |         |
+  |         help: remove this `mut`
+  |
+  = note: `#[warn(unused_mut)]` on by default
+
+error[E0594]: cannot assign to `*s2`, which is behind a `&` reference
+ --> src/main.rs:5:5
+  |
+4 |     let s2 = &s;
+  |              --- help: consider changing this to be a mutable reference: `&mut s`
+5 |     *s2 = "321".to_string();
+  |     ^^^ `s2` is a `&` reference, so the data it refers to cannot be written
+
+For more information about this error, try `rustc --explain E0594`.
+#+end_example
+
+So we do that
+#+begin_src rust
+fn main() {
+    let mut s = "123".to_string();
+    let s2 = &mut s;
+    *s2 = "321".to_string();
+
+    assert_eq!(s, "321".to_string());
+}
+#+end_src
+
+#+RESULTS:
+
+There can be only on mutable reference at the same time
+#+begin_src rust
+fn main() {
+    let mut s = "123".to_string();
+    let s2 = &mut s;
+    let s3 = &mut s;
+
+    *s2 = "321".to_string();
+    *s3 = "321".to_string();
+}
+#+end_src
+
+
+#+begin_example
+error[E0499]: cannot borrow `s` as mutable more than once at a time
+ --> src/main.rs:5:14
+  |
+4 |     let s2 = &mut s;
+  |              ------ first mutable borrow occurs here
+5 |     let s3 = &mut s;
+  |              ^^^^^^ second mutable borrow occurs here
+6 |
+7 |     *s2 = "321".to_string();
+  |     --- first borrow later used here
+
+For more information about this error, try `rustc --explain E0499`.
+#+end_example
+
+#+RESULTS:
+: error: Could not compile `cargoiMyNCA`.
+
+** summary
++ Basic types are copied on assignment, the rest are borrowed
++ To read from a value without moving it, use a reference (=&=)
+  + Also called shared reference
++ Create a mutable reference to edit the original data (Or edit it directly, of course)
+  + There can only be on mutable reference that /edits/ the original data.
+** Conclusions
+Rust memory systems helps makes us see of the memory is moved.
+
+Understanding how the moves works helps us understand why Rust won't compile our code.
+
+When rust makes a move, the same code in C++ usually makes a copy, python will increase the reference counter in the garbage collector.
+
+
+* Safety in integer types
 We can check that values for overflow.
 
 If we are using debug mode when compiling with =cargo=, then Rust will panic.
@@ -20,9 +275,6 @@ fn main() {
 
 We can explicit check this even if we are in release mode.
 
-#+RESULTS:
-: error: Could not compile `cargoXR7VKL`.
-
 #+begin_src rust :exports both
 fn main() {
     let mut x = 2i8;
@@ -35,7 +287,7 @@ fn main() {
 #+RESULTS:
 : thread 'main' panicked at 'overflow', src/main.rs:6:30
 
-* Moving values
+* More on moving values
 Assignment for non-=Copy= types is moved. This means that we cannot keep assigning our vector to different vectors.
 #+begin_src rust :exports code
 fn main() {
@@ -58,7 +310,7 @@ fn main() {
 #+end_src
 
 
-As we can see, =xs= have been moved an is now unitialized, so we cannot move =xs= again to =zs=.
+As we can see, =xs= have been moved an is now uninitialized, so we cannot move =xs= again to =zs=.
 
 We cannot get a =move= a value from inside a vector. Consider
 #+begin_src rust
@@ -68,8 +320,6 @@ fn main() {
 }
 #+end_src
 
-#+RESULTS:
-: error: Could not compile `cargoJHsjvA`.
 #+begin_src
   |
 4 |     let string = v[1];
@@ -78,11 +328,11 @@ fn main() {
   |                  move occurs because value has type `String`, which does not implement the `Copy` trait
   |                  help: consider borrowing here: `&v[1]`
 #+end_src
-Rust suggets that we can borrow the value instead, which is the same as moving a
-reference to that value. This makes sence, since the =Vector= type should not
+Rust suggest that we can borrow the value instead, which is the same as moving a
+reference to that value. This makes sense, since the =Vector= type should not
 have to keep track if some of its values has been moved.
 
-There are also more untrivial ways to handle this. For instance, we can =pop= the value, swap it with something else, etc.
+There are also more nontrivial ways to handle this. For instance, we can =pop= the value, swap it with something else, etc.
 #+begin_src rust
 fn main() {
     let mut v = vec!["testing".to_string(), "hejsan".to_string()];
@@ -97,3 +347,67 @@ fn main() {
 #+end_src
 
 #+RESULTS:
+
+
+* Object orientation (sort of)
+#+begin_src rust
+#[derive(Debug)]
+struct Person {
+    name: String
+}
+
+impl Person {
+    // Type is infered in `sayhi`, but we can specify it
+    fn sayhi(&self) {
+        println!("Hello, {}", self.name)
+    }
+}
+
+impl PartialEq for Person {
+    fn eq(&self, rhs: &Person) -> bool {
+        rhs.name == self.name
+}}
+
+impl Eq for Person {}
+
+fn main () {
+
+    let elvis = Person { name: "Elvis".to_string()};
+    let slash = Person { name: "Slash".to_string() };
+
+    assert_ne!(elvis, slash);
+    elvis.sayhi();
+
+}
+#+end_src
+
+#+RESULTS:
+: Hello, Elvis
+
+Many things, we can auto derive;
+#+begin_src rust
+#[derive(Debug, PartialEq, Eq)]
+struct Person {
+    name: String
+}
+
+impl Person {
+    // Type is infered in `sayhi`, but we can specify it
+    fn sayhi(self: &Person) {
+        println!("Hello, {}", self.name)
+    }
+}
+
+fn main () {
+
+    let elvis = Person { name: "Elvis".to_string()};
+    let slash = Person { name: "Slash".to_string() };
+
+    assert_ne!(elvis, slash);
+    elvis.sayhi();
+}
+
+#+end_src
+
+#+RESULTS:
+: Hello, Elvis

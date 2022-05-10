@@ -41,7 +41,6 @@ impl IntoIterator for Point {
     fn into_iter(self) -> Self::IntoIter {
         [self.x, self.y, self.z].into_iter()
     }
-
 }
 
 impl IntoIterator for &Point {
@@ -52,7 +51,6 @@ impl IntoIterator for &Point {
     fn into_iter(self) -> Self::IntoIter {
         [self.x, self.y, self.z].into_iter()
     }
-
 }
 
 pub fn l2(lhs: &Point, rhs: &Point) -> f32 {

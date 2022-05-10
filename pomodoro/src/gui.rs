@@ -7,7 +7,6 @@ pub struct AppData {
     schedule: iter::Cycle<PomodoroSchedule>,
 }
 impl Sandbox for AppData {
-
     type Message = ();
 
     fn new() -> Self {
@@ -20,11 +19,7 @@ impl Sandbox for AppData {
         "Pomodoro".to_string()
     }
 
-    fn update(
-        &mut self,
-        _message: Self::Message,
-    ) {
-    }
+    fn update(&mut self, _message: Self::Message) {}
 
     fn view(&mut self) -> iced::Element<Self::Message> {
         let msg = if let Some(period) = self.schedule.next() {
