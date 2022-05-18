@@ -1,5 +1,5 @@
-#+title: Notes
 #+date: <2022-05-10 tis>
+#+title: Notes
 #+author: Anton Karlsson
 #+email: anton.karlsson@combitech.com
 
@@ -349,6 +349,17 @@ fn main() {
 #+RESULTS:
 
 
+* Error handling
+See more examples in the code?
+
+Things that can go wrong will return the =Option= type or the =Result= type.
+
+The important part is that both these types lets forces us to check if there is some thing that went wrong.
+
+=Option<T>= is either =Some(T)= or =None=
+
+=Results<T, Error>= is either =Ok(T)= or =Err(Error)=, The =Error= is a special type (trait?) that will contain an error message.
+
 * Object orientation (sort of)
 #+begin_src rust
 #[derive(Debug)]
@@ -411,3 +422,11 @@ fn main () {
 
 #+RESULTS:
 : Hello, Elvis
+
+
+* Enum types and algebraic types
+In Rust, we can use enums like in C and C++, but there is an additional usage called sum types that is used to create clever data structures.
+
+The basic type that uses this is the =Option= type that is used to check if a function returned =null= or something.
+
+See the example in kdtree and octree for examples when we can create nested enum structures.
