@@ -1,3 +1,4 @@
+use std::io::prelude::*;
 use std::sync::mpsc;
 use std::thread;
 
@@ -25,12 +26,19 @@ where
 }
 
 fn main() {
-    // create an example
-    let stdin = std::io::stdin();
-    stdin.lock();
-    stdin.lines().map(|line| {
-        line.iter()
-            .filter(|c| "aeiou".chars().any(|v| v == c))
-            .into();
-    });
+    let lines = vec!["anton", "karlsson"];
+    let res: usize = lines
+        .into_iter()
+        .off_thread() // creates a new thread
+        .map(|line| {
+            line.chars()
+                .filter(|c| "aeiou".chars().any(|v| v == *c))
+                .collect::<String>()
+        })
+        .off_thread()
+        .map(|line| line.len())
+        .off_thread()
+        .sum();
+
+    println!("The results is {}", res);
 }

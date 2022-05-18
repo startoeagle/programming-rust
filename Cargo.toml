@@ -6,6 +6,7 @@ members = [
 	"mandelbrot",
 	"message-passing",
 	"octree",
+	"pipeline-threads",
 	"pomodoro",
 	"quickreplace",
 	]
