@@ -5,12 +5,16 @@
 
 Rust is my favorite language, and I will try to specify where it can be really useful.
 
+* The selling points | Why was I interested in the first place
+
 The main things that makes is good is
 + Memory safety: No program that compiles will have memory error
   - The only possible one is memory leaks, But I am not sure how to do it.
 + Integer safety: The program will crash (in debug compilation), if we are using integers wrong.
 + Everything must be initiated at declaration; No undefined behavior.
 + No data races are possible between threads; This makes writing multi-threaded more viable
+
+* What made me want to stay
 
 After starting using Rust, there are some additional point that makes you want to stay:
 + =cargo=, the build system. While C and C++ makes hard to get going, Rust makes it easy
@@ -367,6 +371,7 @@ struct Person {
     name: String
 }
 
+// Add function to a struct with an `impl` block
 impl Person {
     // Type is infered in `sayhi`, but we can specify it
     fn sayhi(&self) {
@@ -374,11 +379,24 @@ impl Person {
     }
 }
 
+// We can extent `Person` so that we can compare it with other instances of `Person`
+// `PartialEq` is a trait. Any type can be implemented with a trait.
+// `PartialEq` is part of the std library, but we can create our own
+// We can implement a trait for a type that comes from different libraries
+// This makes interfacing easier
 impl PartialEq for Person {
     fn eq(&self, rhs: &Person) -> bool {
         rhs.name == self.name
 }}
 
+// `Person` can be compared with strings, too
+impl PartialEq<str> for Person {
+    fn eq(&self, rhs: &str) -> bool {
+        rhs == self.name
+}}
+
+// A trait does not need any function;
+// it is simply flaged to be handleing something
 impl Eq for Person {}
 
 fn main () {
@@ -391,9 +409,6 @@ fn main () {
 
 }
 #+end_src
-
-#+RESULTS:
-: Hello, Elvis
 
 Many things, we can auto derive;
 #+begin_src rust
@@ -419,9 +434,6 @@ fn main () {
 }
 
 #+end_src
-
-#+RESULTS:
-: Hello, Elvis
 
 * TODO development tools are in lib.rs
 + It is easy to profile with flamegraph
