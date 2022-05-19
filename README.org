@@ -411,3 +411,7 @@ fn main () {
 
 #+RESULTS:
 : Hello, Elvis
+
+
+* TODO development tools are in lib.rs
++ It is easy to profile with flamegraph
