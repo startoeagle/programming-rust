@@ -4,7 +4,9 @@ members = [
 	"counter",
 	"kdtree",
 	"mandelbrot",
+	"message-passing",
 	"octree",
+	"pipeline-threads",
 	"pomodoro",
 	"quickreplace",
 	]
