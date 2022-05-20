@@ -22,7 +22,7 @@ After starting using Rust, there are some additional point that makes you want t
   + Use =cargo new --lib <libname>= to create a library
   + Simply run with =cargo run=
   + Run tests with =cargo test=. If you are writing a library, even documentation examples are tested(!).
-  + Adding dependencies are easy, just edit you =Cargo,toml= file that is created in the project folder.
+  + Adding dependencies are easy, just edit you =Cargo.toml= file that is created in the project folder.
   + For projects when there are smaller teams, rust is useful, since does no have to be someone to handle the build chain in the same way as in C++ or python.
   + =cargo= is a package manager. (=cargo install ripgrep= and don't look back)
 + Then you code does not compile, then we you'll get nice error messages, with concrete suggestions.
@@ -54,7 +54,7 @@ struct Point {
 
 // A function
 fn copy_x(p: &Point) -> f32 {
-    p.x
+    return p.x;
 }
 
 // Main takes no arguments and returns nothing
@@ -89,6 +89,70 @@ fn main () {
 }
 
 #+end_src
+
+#+RESULTS:
+#+begin_example
+warning: field is never read: `y`
+ --> src/main.rs:7:5
+  |
+7 |     y: f32,
+  |     ^^^^^^
+  |
+  = note: `#[warn(dead_code)]` on by default
+note: `Point` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+ --> src/main.rs:4:10
+  |
+4 | #[derive(Debug)]
+  |          ^^^^^
+  = note: this warning originates in the derive macro `Debug` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: field is never read: `z`
+ --> src/main.rs:8:5
+  |
+8 |     z: f32,
+  |     ^^^^^^
+  |
+note: `Point` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+ --> src/main.rs:4:10
+  |
+4 | #[derive(Debug)]
+  |          ^^^^^
+  = note: this warning originates in the derive macro `Debug` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: field is never read: `y`
+ --> src/main.rs:7:5
+  |
+7 |     y: f32,
+  |     ^^^^^^
+  |
+  = note: `#[warn(dead_code)]` on by default
+note: `Point` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+ --> src/main.rs:4:10
+  |
+4 | #[derive(Debug)]
+  |          ^^^^^
+  = note: this warning originates in the derive macro `Debug` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: field is never read: `z`
+ --> src/main.rs:8:5
+  |
+8 |     z: f32,
+  |     ^^^^^^
+  |
+note: `Point` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+ --> src/main.rs:4:10
+  |
+4 | #[derive(Debug)]
+  |          ^^^^^
+  = note: this warning originates in the derive macro `Debug` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+Point { x: 0.0, y: 0.0, z: 0.0 }
+Point {
+    x: 0.0,
+    y: 0.0,
+    z: 0.0,
+}
+#+end_example
 
 #+begin_example
 Point { x: 0.0, y: 0.0, z: 0.0 }
@@ -130,7 +194,7 @@ fn main () {
 #+end_src
 
 #+RESULTS:
-: error: Could not compile `cargo1nDIeN`.
+: error: Could not compile `cargoK8PjOK`.
 
 #+begin_example
 
@@ -161,6 +225,39 @@ fn main () {
 
     println!("{}", s); }
 #+end_src
+
+#+RESULTS:
+#+begin_example
+warning: unused variable: `s2`
+ --> src/main.rs:4:9
+  |
+4 |     let s2 = &s; // Borrow s instead
+  |         ^^ help: if this is intentional, prefix it with an underscore: `_s2`
+  |
+  = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `s3`
+ --> src/main.rs:5:9
+  |
+5 |     let s3 = &s; // We can do this all day
+  |         ^^ help: if this is intentional, prefix it with an underscore: `_s3`
+
+warning: unused variable: `s2`
+ --> src/main.rs:4:9
+  |
+4 |     let s2 = &s; // Borrow s instead
+  |         ^^ help: if this is intentional, prefix it with an underscore: `_s2`
+  |
+  = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `s3`
+ --> src/main.rs:5:9
+  |
+5 |     let s3 = &s; // We can do this all day
+  |         ^^ help: if this is intentional, prefix it with an underscore: `_s3`
+
+123
+#+end_example
 
 =s2= cannot modify the string contents.
 #+begin_src rust
@@ -246,13 +343,13 @@ For more information about this error, try `rustc --explain E0499`.
 : error: Could not compile `cargoiMyNCA`.
 
 ** summary
-+ Basic types are copied on assignment, the rest are borrowed
++ Basic types are copied on assignment, the rest are moved
 + To read from a value without moving it, use a reference (=&=)
   + Also called shared reference
 + Create a mutable reference to edit the original data (Or edit it directly, of course)
   + There can only be on mutable reference that /edits/ the original data.
 ** Conclusions
-Rust memory systems helps makes us see of the memory is moved.
+Rust memory systems helps makes us see how the memory is moved.
 
 Understanding how the moves works helps us understand why Rust won't compile our code.
 
@@ -379,6 +476,16 @@ impl Person {
     }
 }
 
+trait IsEven {
+    fn iseven(&self) -> bool;
+}
+
+impl IsEven for i32 {
+    fn iseven(&self) -> bool {
+        self % 2 == 0
+    }
+}
+
 // We can extent `Person` so that we can compare it with other instances of `Person`
 // `PartialEq` is a trait. Any type can be implemented with a trait.
 // `PartialEq` is part of the std library, but we can create our own
@@ -387,7 +494,8 @@ impl Person {
 impl PartialEq for Person {
     fn eq(&self, rhs: &Person) -> bool {
         rhs.name == self.name
-}}
+    }
+}
 
 // `Person` can be compared with strings, too
 impl PartialEq<str> for Person {
@@ -396,19 +504,20 @@ impl PartialEq<str> for Person {
 }}
 
 // A trait does not need any function;
-// it is simply flaged to be handleing something
+// it is simply flagged to be handling something
 impl Eq for Person {}
 
 fn main () {
-
     let elvis = Person { name: "Elvis".to_string()};
     let slash = Person { name: "Slash".to_string() };
 
     assert_ne!(elvis, slash);
     elvis.sayhi();
-
 }
 #+end_src
+
+#+RESULTS:
+: Hello, Elvis
 
 Many things, we can auto derive;
 #+begin_src rust
@@ -444,3 +553,12 @@ In Rust, we can use enums like in C and C++, but there is an additional usage ca
 The basic type that uses this is the =Option= type that is used to check if a function returned =null= or something.
 
 See the example in kdtree and octree for examples when we can create nested enum structures.
+
+* Mutlithreading
+Rust makes it easy to add multithreading, in fact is says on their start page that Rust enables
+#+begin_quote
+Fearless concurrency
+#+end_quote
+
++ Show =mandelbrot= and =kdtree= for fork-join parallelism
++ Show =pipeline
