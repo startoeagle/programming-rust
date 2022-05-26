@@ -1,105 +1,86 @@
-#![doc = include_str!("../README.md")]
+use std::time::Duration;
 
-use iced::Application;
-use notify_rust as notify;
+use druid::{
+    widget::{Align, Flex, Label},
+    AppLauncher, Data, Env, Lens, RenderContext, Widget, WidgetExt, WidgetPod, WindowDesc,
+};
+use druid::{Event, TimerToken};
 
-mod gui;
-
-const SECONDS_PER_MINUTE: u64 = 60;
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum Period {
-    Work = 25,
-    Break = 5,
-    LongBreak = 15,
+struct Timer {
+    timer_id: TimerToken,
+    time: WidgetPod<u32, Align<u32>>,
 }
 
-impl Period {
-    fn message(&self) -> &'static str {
-        match self {
-            Self::Work => "Time is up! Focus on your task",
-            Self::Break => "Take a break",
-            Self::LongBreak => "Take a long break; you deserve it!",
+static INTERVAL: Duration = Duration::from_millis(10);
+
+impl Widget<u32> for Timer {
+    fn event(
+        &mut self,
+        ctx: &mut druid::EventCtx,
+        event: &druid::Event,
+        data: &mut u32,
+        _env: &Env,
+    ) {
+        match event {
+            Event::WindowConnected => {
+                self.timer_id = ctx.request_timer(INTERVAL);
+            }
+            Event::Timer(id) => {
+                if *id == self.timer_id {
+                    *data += 1;
+                    self.timer_id = ctx.request_timer(INTERVAL);
+                    ctx.request_paint();
+                }
+            }
+            _ => (),
         }
     }
-}
 
-#[derive(Clone)]
-struct PomodoroSchedule {
-    period: u8,
-}
-
-impl PomodoroSchedule {
-    fn new() -> Self {
-        Self { period: 0 }
+    fn lifecycle(
+        &mut self,
+        _ctx: &mut druid::LifeCycleCtx,
+        _event: &druid::LifeCycle,
+        _data: &u32,
+        _env: &Env,
+    ) {
     }
-}
-impl Iterator for PomodoroSchedule {
-    type Item = Period;
 
-    fn next(&mut self) -> Option<Period> {
-        self.period += 1;
-        if self.period > 8 {
-            None
-        } else if self.period == 8 {
-            Some(Period::LongBreak)
-        } else if self.period % 2 == 1 {
-            Some(Period::Work)
-        } else {
-            Some(Period::Break)
-        }
+    fn update(&mut self, _ctx: &mut druid::UpdateCtx, _old_data: &u32, _data: &u32, _env: &Env) {}
+
+    fn layout(
+        &mut self,
+        _ctx: &mut druid::LayoutCtx,
+        bc: &druid::BoxConstraints,
+        data: &u32,
+        _env: &Env,
+    ) -> druid::Size {
+        bc.constrain((500.0, 500.0))
     }
-}
 
-fn notify(msg: &str) -> Result<(), notify_rust::error::Error> {
-    notify::Notification::new()
-        .summary("Pomodoro")
-        .body(msg)
-        .show()?;
-    Ok(())
+    fn paint(&mut self, ctx: &mut druid::PaintCtx, data: &u32, env: &Env) {
+        // let mut label = Label::new(format!("{}", data));
+        // label.paint(ctx, data, env);
+        self.time.paint(ctx, data, env);
+    }
 }
 
 fn main() {
-    gui::AppData::run(iced::Settings::default()).expect("could start application");
-}
+    let main_window = WindowDesc::new(|| {
+        let label = Label::new(|data: &u32, _env: &Env| format!("{}", data));
+        let flex = Flex::column()
+            .with_child(label)
+            .align_vertical(druid::UnitPoint::CENTER)
+            .center();
 
-#[test]
-fn test_period_schedule() {
-    use crate::Period::*;
+        Timer {
+            time: WidgetPod::new(flex),
+            timer_id: TimerToken::INVALID,
+        }
+    })
+    .title("My first app")
+    .with_min_size((400.0, 400.0));
 
-    let mut ps = PomodoroSchedule::new();
-    let mut period = ps.into_iter();
-    assert_eq!(period.next(), Some(Work));
-    assert_eq!(period.next(), Some(Break));
-
-    assert_eq!(period.next(), Some(Work));
-    assert_eq!(period.next(), Some(Break));
-
-    assert_eq!(period.next(), Some(Work));
-    assert_eq!(period.next(), Some(Break));
-
-    assert_eq!(period.next(), Some(Work));
-    assert_eq!(period.next(), Some(LongBreak));
-
-    assert_eq!(period.next(), None);
-}
-#[test]
-fn test_cyclic_schedule() {
-    use crate::Period::*;
-
-    let mut ps = PomodoroSchedule::new();
-    let mut period = ps.into_iter().cycle();
-    assert_eq!(period.next(), Some(Work));
-    assert_eq!(period.next(), Some(Break));
-
-    assert_eq!(period.next(), Some(Work));
-    assert_eq!(period.next(), Some(Break));
-
-    assert_eq!(period.next(), Some(Work));
-    assert_eq!(period.next(), Some(Break));
-
-    assert_eq!(period.next(), Some(Work));
-    assert_eq!(period.next(), Some(LongBreak));
-
-    assert_eq!(period.next(), Some(Work));
+    AppLauncher::with_window(main_window)
+        .launch(0u32)
+        .expect("failed to launch application");
 }

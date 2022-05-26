@@ -1,12 +1,12 @@
 [workspace]
 members = [
 	"actix-gcd",
-	"counter",
 	"kdtree",
 	"mandelbrot",
 	"message-passing",
 	"octree",
 	"pipeline-threads",
 	"pomodoro",
+	"somodoro",
 	"quickreplace",
 	]
