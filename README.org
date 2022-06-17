@@ -371,9 +371,6 @@ fn main() {
 }
 #+end_src
 
-#+RESULTS:
-: thread 'main' panicked at 'attempt to multiply with overflow', src/main.rs:6:13
-
 We can explicit check this even if we are in release mode.
 
 #+begin_src rust :exports both
@@ -447,13 +444,42 @@ fn main() {
 }
 #+end_src
 
-#+RESULTS:
 
-
-* Error handling
+* Error handling, and a bit of pattern matching
 See more examples in the code?
 
 Things that can go wrong will return the =Option= type or the =Result= type.
+#+begin_src rust
+#![allow(dead_code)]
+
+fn canfail(i: bool) -> Option<i32> {
+    let x = 123;
+    if i { Some(x) } else { None }
+}
+
+fn runs_canfail() -> Option<i32> {
+    let res = canfail(true)?;
+    Some(res * 2)
+}
+
+fn main () {
+    let res = canfail(true);
+    println!("{:?}", res);
+
+    match res {
+        Some (0) => println!("NOll"),
+        Some(123) => println!("ett två tre"),
+        Some (h) => println!("The value was {}", h),
+        None => println!("There was no value")
+   }
+
+    let _res = canfail(true).expect("Borde funka????");
+}
+#+end_src
+
+#+RESULTS:
+: Some(123)
+: ett två tre
 
 The important part is that both these types lets forces us to check if there is some thing that went wrong.
 
@@ -498,9 +524,9 @@ impl PartialEq for Person {
 }
 
 // `Person` can be compared with strings, too
-impl PartialEq<str> for Person {
-    fn eq(&self, rhs: &str) -> bool {
-        rhs == self.name
+impl PartialEq<&str> for Person {
+    fn eq(&self, rhs: &&str) -> bool {
+        *rhs == self.name
 }}
 
 // A trait does not need any function;
@@ -512,16 +538,20 @@ fn main () {
     let slash = Person { name: "Slash".to_string() };
 
     assert_ne!(elvis, slash);
+    assert_eq!(elvis, "Elvis");
     elvis.sayhi();
+
+    println!("{}", ((1 as f32) as i32).iseven());
 }
 #+end_src
 
 #+RESULTS:
 : Hello, Elvis
+: false
 
 Many things, we can auto derive;
 #+begin_src rust
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq)]
 struct Person {
     name: String
 }
@@ -532,6 +562,7 @@ impl Person {
         println!("Hello, {}", self.name)
     }
 }
+
 
 fn main () {
 
@@ -547,18 +578,53 @@ fn main () {
 * TODO development tools are in lib.rs
 + It is easy to profile with flamegraph
 
+#+begin_src bash
+cargo flamegraph --example big_octree
+#+end_src
+
+Checkout more tools at lib.rs:
+https://lib.rs/development-tools
+
 * Enum types and algebraic types
 In Rust, we can use enums like in C and C++, but there is an additional usage called sum types that is used to create clever data structures.
 
 The basic type that uses this is the =Option= type that is used to check if a function returned =null= or something.
 
-See the example in kdtree and octree for examples when we can create nested enum structures.
+
+#+begin_src rust
+#![allow(dead_code)]
+
+enum Frame {
+    Image(Vec<u8>),
+    PointCloud(Vec<[f32; 3]>)
+}
+
+
+fn camera_stream() -> Frame {
+    return Frame::Image(vec![0, 123, 32, 2])
+}
+
+fn main ()  {
+    match camera_stream() {
+        Frame::Image(pixels) => println!("pixels {:?}", pixels),
+        Frame::PointCloud(points) => { let _ = dbg!(points); },
+    }
+}
+#+end_src
+
+See the example in kdtree and octree for examples when we can create nested enum
+structures. They contain nested enum types. This means that an enum type can
+recreate itself.
+
+#+RESULTS:
+: pixels [0, 123, 32, 2]
 
 * Mutlithreading
-Rust makes it easy to add multithreading, in fact is says on their start page that Rust enables
+Rust makes it easy to add multithreading, in fact is says on their start page
+that Rust enables
 #+begin_quote
 Fearless concurrency
 #+end_quote
 
 + Show =mandelbrot= and =kdtree= for fork-join parallelism
-+ Show =pipeline
++ Show =pipeline= for message passing parallelism.
