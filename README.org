@@ -628,3 +628,13 @@ Fearless concurrency
 
 + Show =mandelbrot= and =kdtree= for fork-join parallelism
 + Show =pipeline= for message passing parallelism.
+
+* TODO marco rules(!)
+** Discuss how to write marcos
++ the special syntax
+
+** Marcos can be used to create DSL (Domain specif language)
++ A DSL is a language that specializes in solving a small subset of problems
+  + We can call gstreamer launch pipeline for a DSL
+    + it creates a program that would be tedious to write in C
++ With marcos and DSL we can create higher level scripting languages that compiles to Rust code at compile time.
