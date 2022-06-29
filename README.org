@@ -709,7 +709,7 @@ fn main ()  {
 
     print_var!(x);
 
-    // essentialtty a calculator!
+    // essentially a calculator!
     print_var!(1 + 23);
 }
 #+end_src
