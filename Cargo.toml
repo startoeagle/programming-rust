@@ -3,6 +3,7 @@ members = [
 	"actix-gcd",
 	"kdtree",
 	"mandelbrot",
+	"macro_lists",
 	"message-passing",
 	"octree",
 	"pipeline-threads",

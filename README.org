@@ -575,7 +575,7 @@ fn main () {
 
 #+end_src
 
-* TODO development tools are in lib.rs
+* Development tools are in lib.rs
 + It is easy to profile with flamegraph
 
 #+begin_src bash
@@ -629,12 +629,87 @@ Fearless concurrency
 + Show =mandelbrot= and =kdtree= for fork-join parallelism
 + Show =pipeline= for message passing parallelism.
 
-* TODO marco rules(!)
-** Discuss how to write marcos
-+ the special syntax
+* Functional programming
+Basic example:
+#+begin_src rust
+fn main () {
+    let v = vec![1, 2, 3 ,4, 5, 4];
 
+     let enumerate_iter = v.iter()
+                     .map(|x| x + x )
+                     .filter(|&x| x > 2)
+                     .zip(0..);
+
+    for (_x, i) in enumerate_iter {
+        dbg!(i);
+    }
+}
+
+#+end_src
+
+#+RESULTS:
+: error: Could not compile `cargo3KBcJJ`.
+
+
+#+begin_src rust
+
+
+fn launch (f: &dyn Fn(i32) -> i32, x: i32) {
+
+
+    println!("{}", f(x));
+
+}
+
+
+fn main () {
+
+    let y = 345;
+    let f = |x| { x + 123 + y };
+
+    let res = f(123);
+
+    launch(&|x| x * 2, res);
+
+
+
+    println!("{}", res);
+}
+
+#+end_src
+
+* TODO marco rules(!)
 ** Marcos can be used to create DSL (Domain specif language)
 + A DSL is a language that specializes in solving a small subset of problems
   + We can call gstreamer launch pipeline for a DSL
     + it creates a program that would be tedious to write in C
 + With marcos and DSL we can create higher level scripting languages that compiles to Rust code at compile time.
+** Discuss how to write marcos
++ the special syntax
+#+begin_src rust
+macro_rules! mymacro {
+    () => { println!("Hello macro"); }
+}
+
+macro_rules! print_nr {
+    ($x:expr) =>{ println!("{}", $x) };
+}
+
+macro_rules! print_var {
+    ($x:expr) => { println!("{} = {}", stringify!($x), $x) }
+}
+
+fn main ()  {
+
+    mymacro!();
+
+    print_nr!(123);
+    let x = 321;
+    print_nr!(x);
+
+    print_var!(x);
+
+    // essentialtty a calculator!
+    print_var!(1 + 23);
+}
+#+end_src

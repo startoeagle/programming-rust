@@ -16,10 +16,18 @@ fn main() {
         }
     });
 
-    for data in reciever {
-        let mean = data
-            .iter()
-            .fold(0.0, |sum, x| (sum + *x as f32) / data.len() as f32);
-        println!("The mean is {}", mean);
+    let (sender2, reciever2) = mpsc::channel();
+
+    thread::spawn(move || {
+        for data in reciever {
+            let mean = data
+                .iter()
+                .fold(0.0, |sum, x| (sum + *x as f32) / data.len() as f32);
+            sender2.send(mean).unwrap();
+        }
+    });
+
+    for mean in reciever2 {
+        println!("The mean is {:?}", mean);
     }
 }
